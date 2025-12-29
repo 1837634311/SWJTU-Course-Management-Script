@@ -135,8 +135,11 @@ class User:
         url = f"{BASE_URL}/vatuu/CourseStudentAction?setAction=addStudentCourseApply&teachId={teachId}&isBook=1&tt={utils.get_timestamp()}"
         res = self._request("GET", url)
 
-        msg = re.findall("<message>(.*?)</message>", res.text)[0]
-        return msg if msg else "未知返回结果"
+        matches = re.findall("<message>(.*?)</message>", res.text)
+        if matches:
+            return matches[0]
+        else:
+            return "选课系统未开放"
 
     def get_teachId(self, chooseId: str) -> Optional[str]:
         """根据选课编号查询 teachId"""
