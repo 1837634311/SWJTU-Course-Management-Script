@@ -15,16 +15,8 @@ if USE_NEW_SYSTEM:
 else:
     BASE_URL = "http://jwc.swjtu.edu.cn"
 
-LOGIN_PAGE = BASE_URL + "/service/login.html"
-
 
 ocr = ddddocr.DdddOcr(show_ad=False)
-
-HEADERS = {
-    "Referer": LOGIN_PAGE,
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
-    "X-Requested-With": "XMLHttpRequest",
-}
 
 
 class LoginExpiredError(Exception):
@@ -34,11 +26,19 @@ class LoginExpiredError(Exception):
 
 
 def login(username: str, password: str) -> requests.Session:
+    login_page: str = BASE_URL + "/service/login.html"
+
+    headers = {
+        "Referer": login_page,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+
     ss = requests.Session()
-    ss.headers.update(HEADERS)
+    ss.headers.update(headers)
 
     # 访问登录页获取 Cookie
-    ss.get(LOGIN_PAGE)
+    ss.get(login_page)
 
     # 获取验证码
     time.sleep(1)

@@ -35,14 +35,10 @@ class User:
     def send(self, subject, text="") -> None:
         utils.send(self.email_config, subject, text)
 
-    def _check_session_expired(self, res_text) -> None:
-        """检查响应是否包含登录过期信息"""
-        utils.check_session_expired(res_text)
-
     def _request(self, method: str, url: str, **kwargs):
         """统一请求，包含登录状态检查"""
         res = self.ss.request(method=method, url=url, **kwargs)
-        self._check_session_expired(res.text)
+        utils.check_session_expired(res.text)
         return res
 
     def _monitor_loop(self, task_name: str, func, args=(), success_check=None):
