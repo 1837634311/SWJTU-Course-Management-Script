@@ -47,19 +47,26 @@ class User:
             task_name: 任务名称
             func: 每次循环执行的函数
             args: 函数参数
-            success_check: 判断是否成功的回调函数，接收 func 的返回值
+            check: 判断是否完成的回调函数，接收 func 的返回值
         """
-        assert success_check is not None, "必须提供 success_check 回调函数"
+
+        def check_completed(msg):
+            status: list[str] = ["选课成功", "选课申请成功", "冲突"]
+            return any(s in msg for s in status)
+
+        if check is None:
+            check = check_completed
+
         print(f"开始选课: {task_name}")
 
         while True:
             try:
                 # 执行核心逻辑
                 result = func(*args)
-                print(f"[{utils.get_time()}] {task_name}: {result}")
+                print(f"[{utils.get_time()}] {task_name} : {result}")
 
                 # 检查是否成功
-                if success_check(result):
+                if check(result):
                     print(f"课程 {task_name} 已完成。")
                     break
 
@@ -190,15 +197,10 @@ class User:
     def run_select_course_with_teachId(self, teachId: str, course_name: str):
         """已知 teachId 直接选课任务"""
 
-        def check_success(msg):
-            status: list[str] = ["选课成功", "选课申请成功", "冲突"]
-            return any(s in msg for s in status)
-
         self._monitor_loop(
             task_name=f"{course_name}",
             func=self.select_course,
             args=(teachId,),
-            success_check=check_success,
         )
 
 
