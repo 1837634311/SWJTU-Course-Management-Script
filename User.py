@@ -41,7 +41,7 @@ class User:
         return res
 
     def _monitor_loop(
-        self, task_name: str, func, args=(), check=None, send_email=False
+        self, task_name: str, func, interval, args=(), check=None, send_email=False
     ):
         """通用监控循环
 
@@ -83,7 +83,7 @@ class User:
             except Exception as e:
                 print(f"[{utils.get_time()}] {task_name} 发生异常: {e}")
 
-            time.sleep(0.5)
+            time.sleep(interval)
 
     def query_by_course_code(self, code: str) -> None:
         """按课程代码查询可选课程，返回可选课程的相关信息"""
@@ -190,23 +190,22 @@ class User:
             else:
                 print(f"未在已选列表中找到课程 {chooseId}")
 
-    def run_select_course(self, chooseId: str, send_email=False):
+    def run_select_course(self, chooseId: str, interval=0.5, send_email=False):
         """持续尝试选课任务"""
         teachId = self.get_teachId(chooseId)
         if teachId:
-            self.run_select_course_with_teachId(
-                teachId, course_name=chooseId, send_email=send_email
-            )
+            self.run_select_course_with_teachId(teachId, chooseId, interval, send_email)
         else:
             print("未找到 teachId，请检查课程编码是否正确")
 
     def run_select_course_with_teachId(
-        self, teachId: str, course_name: str, send_email=False
+        self, teachId: str, course_name: str, interval=0.5, send_email=False
     ):
         """已知 teachId 直接选课任务"""
 
         self._monitor_loop(
             task_name=f"{course_name}",
+            interval=interval,
             func=self.select_course,
             args=(teachId,),
             send_email=send_email,

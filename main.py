@@ -61,13 +61,16 @@ def _(threading, user):
         ('C8807086D60F0EF0', '雷治红-岩体力学'),
     ]
 
+    # 选课成功后，是否发送邮件通知
     send_mail = True
+    # 选课间隔
+    interval = 0.5
 
     threads = []
     for teachId, course in teachIds:
         thread = threading.Thread(
             target=user.run_select_course_with_teachId,
-            args=(teachId, course, send_mail),
+            args=(teachId, course, interval, send_mail),
         )
         threads.append(thread)
     # 启动线程
@@ -90,12 +93,16 @@ def _(mo):
 def _(threading, user):
     chooseIds = ["B0894"]
 
+    # 选课成功后，是否发送邮件通知
     send_email = True
+    # 选课间隔
+    interval = 0.5
 
     threads2 = []
     for chooseId in chooseIds:
         thread2 = threading.Thread(
-            target=user.run_select_course, args=(chooseId, send_email)
+            target=user.run_select_course,
+            args=(chooseId, interval, send_email),
         )
         threads2.append(thread2)
 
