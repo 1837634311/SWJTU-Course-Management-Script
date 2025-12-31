@@ -120,7 +120,8 @@ def send(config, subject, text):
 
 
 def get_time() -> str:
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    """返回时间：`2025-12-31 14:09:42:444`"""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
 
 
 def get_timestamp() -> int:

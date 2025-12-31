@@ -71,10 +71,8 @@ class User:
                     print(f"重连失败: {e}")
             except Exception as e:
                 print(f"[{utils.get_time()}] {task_name} 发生异常: {e}")
-                # 防止 CPU 空转
-                time.sleep(1)
 
-            time.sleep(1)
+            time.sleep(0.5)
 
     def query_by_course_code(self, code: str) -> None:
         """按课程代码查询可选课程，返回可选课程的相关信息"""
