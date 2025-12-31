@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <title>选课-VATUU为途教学信息服务平台</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="VATUU,为途,教学信息服务平台,教务管理系统,教务网,教务系统" />
+    <meta name="description" content="VATUU为途，专注于高等教育信息化，中国领先的教学信息化解决方案服务商" />
+    <link rel="stylesheet" href="../css/usersys/frame.css" />
+    <link rel="stylesheet" type="text/css" href="../css/webox/jquery-webox.css" />
+    <style>
+        marquee {
+
+            border: 1px solid ButtonShadow;
+
+            background: ffffff;
+
+            height: 12px;
+
+            font-size: 1px;
+
+            margin: 1px;
+
+            width: 250px;
+
+
+
+            -moz-binding: url("marquee-binding.xml#marquee");
+
+            -moz-box-sizing: border-box;
+
+
+
+            display: block;
+
+            overflow: hidden;
+
+            margin-left: 4px;
+
+        }
+
+
+
+        marquee span {
+
+            height: 15px;
+
+            margin: 1px;
+
+            width: 6px;
+
+            background: ff9900;
+
+            float: left;
+
+            font-size: 1px;
+
+        }
+    </style>
+</head>
+
+<body style="height: 100%; background: #fafafa;" onload="getStudentCreditHour()">
+    <div class="main_content clearfix" style="min-height: 100%" id="main_content">
+        <div class="l_nav" id="l_nav">
+            <ul>
+                <li><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysLeader"
+                        class="nav_icon_25">选课系统向导</a></li>
+                <li><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysApply"
+                        class="nav_icon_05">选课申请查询</a></li>
+                <li><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysRecommend"
+                        class="nav_icon_13">按优选班选课</a></li>
+                <li class="active"><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysSchedule"
+                        class="nav_icon_15">选其他班课程</a></li>
+                <!--<li ><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysList&viewType=editCourse" class="nav_icon_04">更换教学班</a></li>-->
+                <li><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysList&viewType=delCourse"
+                        class="nav_icon_24">撤销已有选课</a></li>
+                <!--<li ><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysList&viewType=delCourse" class="nav_icon_10">选课结果查询</a></li>-->
+                <li><a href="../vatuu/CourseStudentAction?setAction=studentCourseSysTable"
+                        class="nav_icon_10">选课结果查询</a></li>
+                <li><a href="../vatuu/CourseAction?setAction=queryStudentCourseLog&viewType=courseSys"
+                        class="nav_icon_11">选课日志查看</a></li>
+            </ul>
+        </div>
+        <div class="r_content" id="r_content">
+            <div class="t_header clearfix">
+                <div class="btn-group">
+                    <button class="btn_1" onclick="window.history.go(-1);"></button>
+                    <button class="btn_2" onclick="window.history.go(1);"></button>
+                    <button class="btn_3" onclick="window.location.reload();"></button>
+                </div>
+                <div class="search-box">
+                    <button class="btn_search"></button>
+                    <input type="text" name="" id="" value="" />
+                </div>
+            </div>
+            <div class="b_content clearfix">
+                <!--提示说明信息，可以根据需要隐藏-->
+                <div class="instruction-div clearfix">
+                    <div style="padding:5px 10px;">
+                        <span class="important">说明：下表列出全部可选课程，可以根据需要进行选择。限制--如提示受限，可以点击查看详细，受限课程在提交申请时会进行判断。</span>
+                    </div>
+                </div>
+                <!--提示结束-->
+                <!--主体内容-->
+                <div class="tb_cont">
+                    <table class="frame-table"
+                        style="width:100%;border:0;border-collapse:collapse;border-spacing:0; padding:0;">
+                        <tr class="form-style">
+                            <td style="height:38px;">
+                                &nbsp;&nbsp;2023114566&nbsp;XXX，<!-- 地球科学与工程学院地质工程专业， -->当前选课学期：<strong>2025-2026第2学期<span
+                                        id="viewCreditHour"></span></strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height:5px;"></td>
+                        </tr>
+                        <tr class="form-style" style="background-color:#E9F8E4;">
+                            <td style="height:45px;">
+                                <form name="queryForm" action="../vatuu/CourseStudentAction" method="post">
+                                    <input type="hidden" name="setAction" value="studentCourseSysSchedule">
+                                    <input type="hidden" name="viewType" value="">
+                                    <input type="hidden" name="jumpPage" value="1"> &nbsp;&nbsp;课程查询： <select
+                                        name="selectAction" id="selectAction" class="select" style="width:140px;">
+                                        <option value="QueryName">按课程名称查询</option>
+                                        <option value="CourseCode" selected>按课程代码查询</option>
+                                        <option value="TeachID">按选课编号查询</option>
+                                        <option value="QueryTeacherName">按教师姓名查询</option>
+                                        <option value="QueryCollege">按开课院系查询</option>
+                                        <option value="QueryTeachType">按优选班级查询</option>
+                                        <option value="CreditHour">按学分查询</option>
+                                        <option value="QuerySchooleArea">按校区查询</option>
+                                        <!--<option value="QueryKey" >所有信息</option>  -->
+                                    </select>
+                                    <input type="text" name="key1" id="key1" placeholder="请输入查找关键字" value="FGEE007012"
+                                        class="input" style="width:220px;" />&nbsp; <select name="courseType"
+                                        id="courseType" class="select" style="width:80px;">
+                                        <option value="all" selected>全部</option>
+                                        <option value="bixiu">必修</option>
+                                        <option value="xianxuan">限选</option>
+                                        <option value="xuanxiu">选修</option>
+                                    </select>
+                                    <select name="key4" id="key4" class="select" style="width:120px;">
+                                        <option value="">全部学院</option>
+                                    </select>
+                                    <input type="submit" name="btn" value="执行查询" class="btn btn-blue">
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height:5px;"></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table class="table_border" id="table3">
+                                    <tr>
+                                        <th style="width:4%">序号 </th>
+                                        <th style="width:4%">编号</th>
+                                        <th style="width:5%">代码</th>
+                                        <th style="width:13%">课程名称 </th>
+                                        <th style="width:4%">班号</th>
+                                        <th style="width:4%">学分</th>
+                                        <th style="width:4%">性质</th>
+                                        <th style="width:4%">院系</th>
+                                        <th style="width:5%">教师 </th>
+                                        <th style="width:5%">职称</th>
+                                        <th style="width:13%">时间地点</th>
+                                        <th style="width:10%">优选</th>
+                                        <th style="width:5%">状态</th>
+                                        <th style="width:4%">申请</th>
+                                        <th style="width:4%">校区</th>
+                                        <th style="width:4%">限制</th>
+                                        <th style="width:4%">操作</th>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td><span id="teachIdChooseB0868"
+                                                style="display:none;">7893038D879A8362</span><span
+                                                id="teachIdB0868">B0868</span></td>
+                                        <td><a href="javascript:setQuery('CourseCode','FGEE007012')"
+                                                title="点击查询全部代码为FGEE007012课程" class="link1"><span
+                                                    id="courseCodeB0868">FGEE007012</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryName','地球物理勘探')"
+                                                title="点击查询全部名称为地球物理勘探课程" class="link1"><span
+                                                    id="courseNameB0868">地球物理勘探</span></a></td>
+                                        <td><span id="teachClassIdB0868">1</span></td>
+                                        <td><a href="javascript:setQuery('CreditHour','4.0')" title="点击查询全部学分为4.0课程"
+                                                class="link1"><span id="creditHourB0868">4.0</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCourseType','必')" title="点击查询全部性质为必课程"
+                                                class="link1"><span id="courseTypeB0868">必修</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCollegeCode','21')" title="点击查询地学学院全部课程"
+                                                class="link1">地学</a></td>
+                                        <td><a href="javascript:setQuery('QueryTeacherName','张志厚')"
+                                                title="点击查询张志厚老师全部课程" class="link1"><span
+                                                    id="teacherNameB0868">张志厚</span></a></td>
+                                        <td>副教授</td>
+                                        <td> 1-17周 星期三 3-4节<br> 1-17周 星期四 3-4节<br>
+                                        </td>
+                                        <td>地质2023-01班</td>
+                                        <td> 21/30 </td>
+                                        <td>0</td>
+                                        <td><a href="javascript:setQuery('QuerySchooleArea','犀浦')" title="点击查询犀浦校区全部课程"
+                                                class="link1"><span id="schoolAreaB0868">犀浦</span></a></td>
+                                        <td>
+                                            <a href="javascript:viewChooseRule('61E92EF67418DC54','7893038D879A8362')"
+                                                style="color:#ff0000;" title="查看该课程限制情况"><u>有限</u></a>
+                                        </td>
+                                        <td>
+                                            <span style="color:#ff0000;">非优选班</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td><span id="teachIdChooseB0869"
+                                                style="display:none;">7E37FAB1E88C8C24</span><span
+                                                id="teachIdB0869">B0869</span></td>
+                                        <td><a href="javascript:setQuery('CourseCode','FGEE007012')"
+                                                title="点击查询全部代码为FGEE007012课程" class="link1"><span
+                                                    id="courseCodeB0869">FGEE007012</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryName','地球物理勘探')"
+                                                title="点击查询全部名称为地球物理勘探课程" class="link1"><span
+                                                    id="courseNameB0869">地球物理勘探</span></a></td>
+                                        <td><span id="teachClassIdB0869">2</span></td>
+                                        <td><a href="javascript:setQuery('CreditHour','4.0')" title="点击查询全部学分为4.0课程"
+                                                class="link1"><span id="creditHourB0869">4.0</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCourseType','必')" title="点击查询全部性质为必课程"
+                                                class="link1"><span id="courseTypeB0869">必修</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCollegeCode','21')" title="点击查询地学学院全部课程"
+                                                class="link1">地学</a></td>
+                                        <td><a href="javascript:setQuery('QueryTeacherName','张立')" title="点击查询张立老师全部课程"
+                                                class="link1"><span id="teacherNameB0869">张立</span></a></td>
+                                        <td>副教授</td>
+                                        <td> 1-17周 星期二 6-7节<br> 1-17周 星期三 3-4节<br>
+                                        </td>
+                                        <td>地质2023-02班</td>
+                                        <td> 21/30 </td>
+                                        <td>1</td>
+                                        <td><a href="javascript:setQuery('QuerySchooleArea','犀浦')" title="点击查询犀浦校区全部课程"
+                                                class="link1"><span id="schoolAreaB0869">犀浦</span></a></td>
+                                        <td>
+                                            <a href="javascript:viewChooseRule('61E92EF67418DC54','7E37FAB1E88C8C24')"
+                                                style="color:#ff0000;" title="查看该课程限制情况"><u>有限</u></a>
+                                        </td>
+                                        <td>
+                                            <span style="color:#ff0000;">非优选班</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td><span id="teachIdChooseB0870"
+                                                style="display:none;">B376082258DAC2D9</span><span
+                                                id="teachIdB0870">B0870</span></td>
+                                        <td><a href="javascript:setQuery('CourseCode','FGEE007012')"
+                                                title="点击查询全部代码为FGEE007012课程" class="link1"><span
+                                                    id="courseCodeB0870">FGEE007012</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryName','地球物理勘探')"
+                                                title="点击查询全部名称为地球物理勘探课程" class="link1"><span
+                                                    id="courseNameB0870">地球物理勘探</span></a></td>
+                                        <td><span id="teachClassIdB0870">3</span></td>
+                                        <td><a href="javascript:setQuery('CreditHour','4.0')" title="点击查询全部学分为4.0课程"
+                                                class="link1"><span id="creditHourB0870">4.0</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCourseType','必')" title="点击查询全部性质为必课程"
+                                                class="link1"><span id="courseTypeB0870">必修</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCollegeCode','21')" title="点击查询地学学院全部课程"
+                                                class="link1">地学</a></td>
+                                        <td><a href="javascript:setQuery('QueryTeacherName','张健')" title="点击查询张健老师全部课程"
+                                                class="link1"><span id="teacherNameB0870">张健</span></a></td>
+                                        <td>副教授</td>
+                                        <td> 1-17周 星期二 6-7节<br> 1-17周 星期三 6-7节<br>
+                                        </td>
+                                        <td>地质2023-03班</td>
+                                        <td> 17/30 </td>
+                                        <td>3</td>
+                                        <td><a href="javascript:setQuery('QuerySchooleArea','犀浦')" title="点击查询犀浦校区全部课程"
+                                                class="link1"><span id="schoolAreaB0870">犀浦</span></a></td>
+                                        <td>
+                                            <a href="javascript:viewChooseRule('61E92EF67418DC54','B376082258DAC2D9')"
+                                                style="color:#ff0000;" title="查看该课程限制情况"><u>有限</u></a>
+                                        </td>
+                                        <td>
+                                            <span style="color:#ff0000;">非优选班</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td><span id="teachIdChooseB0871"
+                                                style="display:none;">34F1B9283687FF4F</span><span
+                                                id="teachIdB0871">B0871</span></td>
+                                        <td><a href="javascript:setQuery('CourseCode','FGEE007012')"
+                                                title="点击查询全部代码为FGEE007012课程" class="link1"><span
+                                                    id="courseCodeB0871">FGEE007012</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryName','地球物理勘探')"
+                                                title="点击查询全部名称为地球物理勘探课程" class="link1"><span
+                                                    id="courseNameB0871">地球物理勘探</span></a></td>
+                                        <td><span id="teachClassIdB0871">4</span></td>
+                                        <td><a href="javascript:setQuery('CreditHour','4.0')" title="点击查询全部学分为4.0课程"
+                                                class="link1"><span id="creditHourB0871">4.0</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCourseType','必')" title="点击查询全部性质为必课程"
+                                                class="link1"><span id="courseTypeB0871">必修</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCollegeCode','21')" title="点击查询地学学院全部课程"
+                                                class="link1">地学</a></td>
+                                        <td><a href="javascript:setQuery('QueryTeacherName','胥鸿睿')"
+                                                title="点击查询胥鸿睿老师全部课程" class="link1"><span
+                                                    id="teacherNameB0871">胥鸿睿</span></a></td>
+                                        <td>讲师</td>
+                                        <td> 1-17周 星期一 6-7节<br> 1-17周 星期二 6-7节<br>
+                                        </td>
+                                        <td>地质2023-04班</td>
+                                        <td> 18/30 </td>
+                                        <td>0</td>
+                                        <td><a href="javascript:setQuery('QuerySchooleArea','犀浦')" title="点击查询犀浦校区全部课程"
+                                                class="link1"><span id="schoolAreaB0871">犀浦</span></a></td>
+                                        <td>
+                                            <a href="javascript:viewChooseRule('61E92EF67418DC54','34F1B9283687FF4F')"
+                                                style="color:#ff0000;" title="查看该课程限制情况"><u>有限</u></a>
+                                        </td>
+                                        <td>
+                                            <input type="button" name="btn1" value="选课" class="btn btn-blue"
+                                                style="width:60px;" onclick="addApply('B0871')">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td><span id="teachIdChooseB0872"
+                                                style="display:none;">96CEA07EE87D6C63</span><span
+                                                id="teachIdB0872">B0872</span></td>
+                                        <td><a href="javascript:setQuery('CourseCode','FGEE007012')"
+                                                title="点击查询全部代码为FGEE007012课程" class="link1"><span
+                                                    id="courseCodeB0872">FGEE007012</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryName','地球物理勘探')"
+                                                title="点击查询全部名称为地球物理勘探课程" class="link1"><span
+                                                    id="courseNameB0872">地球物理勘探</span></a></td>
+                                        <td><span id="teachClassIdB0872">5</span></td>
+                                        <td><a href="javascript:setQuery('CreditHour','4.0')" title="点击查询全部学分为4.0课程"
+                                                class="link1"><span id="creditHourB0872">4.0</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCourseType','必')" title="点击查询全部性质为必课程"
+                                                class="link1"><span id="courseTypeB0872">必修</span></a></td>
+                                        <td><a href="javascript:setQuery('QueryCollegeCode','21')" title="点击查询地学学院全部课程"
+                                                class="link1">地学</a></td>
+                                        <td><a href="javascript:setQuery('QueryTeacherName','孙辉')" title="点击查询孙辉老师全部课程"
+                                                class="link1"><span id="teacherNameB0872">孙辉</span></a></td>
+                                        <td>副教授</td>
+                                        <td> 1-17周 星期二 9-10节<br> 1-17周 星期三 9-10节<br>
+                                        </td>
+                                        <td>资勘2023-01班</td>
+                                        <td> 18/30 </td>
+                                        <td>2</td>
+                                        <td><a href="javascript:setQuery('QuerySchooleArea','犀浦')" title="点击查询犀浦校区全部课程"
+                                                class="link1"><span id="schoolAreaB0872">犀浦</span></a></td>
+                                        <td>
+                                            <a href="javascript:viewChooseRule('61E92EF67418DC54','96CEA07EE87D6C63')"
+                                                style="color:#ff0000;" title="查看该课程限制情况"><u>有限</u></a>
+                                        </td>
+                                        <td>
+                                            <span style="color:#ff0000;">非优选班</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="18" style="height:60px;">
+                                            <form name="pageForm" action="../vatuu/CourseStudentAction" method="get">
+                                                <input type="hidden" name="setAction" value="studentCourseSysSchedule">
+                                                <input type="hidden" name="viewType" value="">
+                                                <input type="hidden" name="orderType" value="teachId">
+                                                <input type="hidden" name="orderValue" value="asc">
+                                                <input type="hidden" name="selectAction" value="CourseCode">
+                                                <input type="hidden" name="key1" value="FGEE007012">
+                                                <input type="hidden" name="key2" value="">
+                                                <input type="hidden" name="key3" value="">
+                                                <input type="hidden" name="key4" value="">
+                                                <input type="hidden" name="courseType" value="all">
+                                                <div class="footer">
+                                                    <p>共有记录[5]条，当前第[<span class="cr">1</span>]页，50条/页，共[1]页</p>
+                                                    <div class="page">
+                                                        <a href="" class="btn btn-page">首页</a>
+                                                        <a href="" class="btn btn-page">上一页</a>
+                                                        <a href="javascript:gotoPage(1)" class="btn btn-page">1</a>
+                                                        转到：<SELECT name="jumpPage" onchange="document.pageForm.submit()"
+                                                            class="btn btn-page">
+                                                            <OPTION selected value="1">1</OPTION>
+                                                        </SELECT>
+                                                        <a href="" class="btn btn-page">下一页</a>
+                                                        <a href="" class="btn btn-page">尾页</a>
+                                                        <br><br>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!--主体结束-->
+            </div>
+        </div>
+    </div>
+    <div id="viewChooseInfo" style="font-size:14px;display:none;">
+        <table style="width:100%;border:0;border-collapse:collapse;border-spacing:0; padding:0;">
+            <tr>
+                <td style="height:35px; background-color:#E7F1DE;font-size:14px;">&nbsp;<strong>您确定选择该课程吗？</strong></td>
+            </tr>
+            <tr>
+                <td style="height:240px; background-color:#F2F9EE; line-height:25px;overflow:hidden;font-size:14px;">
+                    <input type="hidden" id="teachIdChooseValue" name="teachIdChooseValue" value=""> &nbsp;选课编号：<span
+                        id="teachIdChoose"></span><br> &nbsp;课程代码：<span id="courseCodeChoose"></span><br>
+                    &nbsp;课程名称：<span id="courseNameChoose"></span><br> &nbsp;教学班号：<span
+                        id="teachClassIdChoose"></span><br> &nbsp;任课教师：<span id="teacherNameChoose"></span><br>
+                    &nbsp;课程性质：<span id="courseTypeChoose"></span><br> &nbsp;课程学分：<span
+                        id="creditHourChoose"></span><br> &nbsp;所在校区：<span id="schoolAreaChoose"></span><br>
+                </td>
+            </tr>
+            <tr>
+                <td style="height:35px; background-color:#E7F1DE;font-size:14px;"><label>
+                        <input name="isBook" type="checkbox" id="isBook" value="1" checked />
+                        <span style="color:#0000ff; font-weight:bold;">需要教材</span>（点击查看教材）</label></td>
+            </tr>
+            <tr>
+                <td style="height:40px;text-align:center;"><input type="button" name="btn1_1" value="确定选课"
+                        class="btn btn-blue" style="width:120px;" onclick="addApplyChoose()">&nbsp;<input type="button"
+                        name="btn1_2" value="取消" class="btn btn-red" style="width:60px;" onclick="selfCloseWebox()">
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="viewLoading" style="display:none;">
+        <p>&nbsp;选课请求中，请稍后...<br>
+            <marquee direction="right" scrollamount="8">
+                <table style="font-size:1px;width:100px;height:20px;">
+                    <tr>
+                        <td style="background-color:#e5fee5;"></td>
+                        <td style="background-color:#caf7ca;"></td>
+                        <td style="background-color:#8feb90;"></td>
+                        <td style="background-color:#caf7ca;"></td>
+                        <td style="background-color:#e5fee5;"></td>
+                    </tr>
+                </table>
+            </marquee>
+            <font color=#5B5B5B>&nbsp;建议使用Chrome或IE10以上浏览器，查看<a href="#" target="_blank"><u>详情</u></a></font>
+        </p>
+    </div>
+    <script src="../js/usersys/changeHeight.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/jquery/1.12.4/jquery.js"></script>
+    <script type="text/javascript" src="../js/webox/jquery-webox.js"></script>
+    <script>
+        var xmlHttp;
+
+
+
+        function createXMLHttpRequest() {
+
+            if (window.ActiveXObject) {
+
+                xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+
+            }
+
+            else if (window.XMLHttpRequest) {
+
+                xmlHttp = new XMLHttpRequest();
+
+            }
+
+        }
+
+        //获取选课学分信息
+
+        function getStudentCreditHour(action) {
+
+            var url = "";
+
+            if (action == "refresh") {
+
+                url = "../vatuu/AjaxXML?selectType=queryStudentCourseCreditHour&tt=" + new Date().getTime();
+
+            }
+
+            else {
+
+                url = "../vatuu/AjaxXML?selectType=queryStudentCourseCreditHour";
+
+            }
+
+            createXMLHttpRequest();
+
+            xmlHttp.onreadystatechange = getStudentCreditHourStateChange;
+
+            xmlHttp.open("GET", url, true);
+
+            xmlHttp.send(null);
+
+        }
+
+        function getStudentCreditHourStateChange() {
+
+            if (xmlHttp.readyState == 4) {
+
+                if (xmlHttp.status == 200) {
+
+                    updateStudentCreditHour();
+
+                }
+
+            }
+
+        }
+
+        function updateStudentCreditHour() {
+
+            var select_state = xmlHttp.responseXML.getElementsByTagName("select_state")[0].firstChild.nodeValue;
+
+            var select_message = xmlHttp.responseXML.getElementsByTagName("select_message")[0].firstChild.nodeValue;
+
+            if (select_state == "1") {
+
+                var apply_num = xmlHttp.responseXML.getElementsByTagName("apply_num")[0].firstChild.nodeValue;
+
+                var apply_num_xuan = xmlHttp.responseXML.getElementsByTagName("apply_num_xuan")[0].firstChild.nodeValue;
+
+                var choose_num = xmlHttp.responseXML.getElementsByTagName("choose_num")[0].firstChild.nodeValue;
+
+                var applied_num = xmlHttp.responseXML.getElementsByTagName("applied_num")[0].firstChild.nodeValue;
+
+                var use_num = xmlHttp.responseXML.getElementsByTagName("use_num")[0].firstChild.nodeValue;
+
+                //var text="最多可选【"+apply_num+""+(apply_num_xuan.length<0?"":"（选修学分"+apply_num_xuan+"）")+"】，已选【"+choose_num+"】，新增【"+applied_num+"】，可继续申请【"+use_num+"】";
+
+                var text = "最多可选【" + apply_num + "" + (parseInt(apply_num_xuan) < 0 ? "" : "（其中选修学分" + apply_num_xuan + "）") + "】，已选【" + choose_num + "】<!--，新增【 " +applied_nu m +"】，可继续申请【 " +use_nu m +"】--><a href=\"javascript:modifyStudentCreditHour()\" class=\"btn btn-mini\">刷新</a>";
+
+                document.getElementById("viewCreditHour").innerHTML = text;
+
+            }
+
+            else {
+
+                alert(select_message);
+
+            }
+
+            viewCollegeInfo();
+
+        }
+
+
+
+        function gotoPage(pagenum) {
+
+            document.pageForm.jumpPage.value = pagenum;
+
+            document.pageForm.submit();
+
+            return;
+
+        }
+
+
+
+        function setQuery(type, key) {
+
+            //document.queryForm.target="_self";
+
+            if (type == "QueryCourseType") {
+
+                var courseType = "all";
+
+                if (key == "必") {
+
+                    courseType = "bixiu";
+
+                }
+
+                else if (key == "选") {
+
+                    courseType = "xuanxiu";
+
+                }
+
+                else if (key == "限") {
+
+                    courseType = "xianxuan";
+
+                }
+
+                else {
+
+                    courseType = "all";
+
+                }
+
+                document.queryForm.selectAction.value = "QueryAll";
+
+                document.queryForm.courseType.value = courseType;
+
+                document.queryForm.key1.value = "";
+
+                document.queryForm.key4.value = "";
+
+            }
+
+            else if (type == "QueryCollegeCode") {
+
+                document.queryForm.selectAction.value = "QueryAll";
+
+                document.queryForm.courseType.value = "all";
+
+                document.queryForm.key1.value = "";
+
+                document.queryForm.key4.value = key;
+
+            }
+
+            else {
+
+                document.queryForm.selectAction.value = type;
+
+                document.queryForm.key1.value = key;
+
+                document.queryForm.key4.value = "";
+
+            }
+
+            document.queryForm.submit();
+
+        }
+
+
+
+
+
+        function viewCollegeInfo() {
+
+            var url = "../vatuu/AjaxXML?selectType=CollegeInfo&selectValue=teachingCollege";
+
+            createXMLHttpRequest();
+
+            xmlHttp.onreadystatechange = collegeStateChange;
+
+            xmlHttp.open("GET", url, true);
+
+            xmlHttp.send(null);
+
+        }
+
+        function collegeStateChange() {
+
+            if (xmlHttp.readyState == 4) {
+
+                if (xmlHttp.status == 200) {
+
+                    updateCollege();
+
+                }
+
+            }
+
+        }
+
+        function updateCollege() {
+
+            clearModelsList("key4");
+
+            var college_code_value = xmlHttp.responseXML.getElementsByTagName("college_code");
+
+            var college_name_value = xmlHttp.responseXML.getElementsByTagName("college_name");
+
+            var college_abname_value = xmlHttp.responseXML.getElementsByTagName("college_abname");
+
+            var option = null;
+
+            document.queryForm.key4.options[document.queryForm.key4.length] = new Option("全部学院", "");
+
+            for (var i = 0; i < college_code_value.length; i++) {
+
+                document.queryForm.key4.options[document.queryForm.key4.length] = new Option(college_abname_value[i].firstChild.nodeValue, college_code_value[i].firstChild.nodeValue);
+
+            }
+
+            document.queryForm.key4.value = "";
+
+
+
+
+
+        }
+
+
+
+        function clearModelsList(name) {
+
+            var models;
+
+            models = document.getElementById(name);
+
+            while (models.childNodes.length > 0) {
+
+                models.removeChild(models.childNodes[0]);
+
+            }
+
+        }
+
+
+
+        function addApply(teachId) {
+
+            $.webox({ html: $("#viewChooseInfo").html(), bgvisibel: true, width: 300, height: 390, title: '选课确认' });
+
+            $(".webox").find("#teachIdChoose").html(document.getElementById("teachId" + teachId).innerHTML);
+
+            $(".webox").find("#courseCodeChoose").html(document.getElementById("courseCode" + teachId).innerHTML);
+
+            $(".webox").find("#courseNameChoose").html(document.getElementById("courseName" + teachId).innerHTML);
+
+            $(".webox").find("#teachClassIdChoose").html(document.getElementById("teachClassId" + teachId).innerHTML);
+
+            $(".webox").find("#teacherNameChoose").html(document.getElementById("teacherName" + teachId).innerHTML);
+
+            $(".webox").find("#courseTypeChoose").html(document.getElementById("courseType" + teachId).innerHTML);
+
+            $(".webox").find("#creditHourChoose").html(document.getElementById("creditHour" + teachId).innerHTML);
+
+            $(".webox").find("#schoolAreaChoose").html(document.getElementById("schoolArea" + teachId).innerHTML);
+
+            $(".webox").find("#teachIdChooseValue").val(document.getElementById("teachIdChoose" + teachId).innerHTML);
+
+        }
+
+
+
+        function addApplyChoose() {
+
+
+
+
+
+            var teachIdChoose = $(".webox").find("#teachIdChooseValue").val();
+
+            var isBook = "0";
+
+            if (document.getElementById("isBook").checked) {
+
+                isBook = "1";
+
+            }
+
+            else {
+
+                isBook = "0";
+
+            }
+
+            $.webox({ html: $("#viewLoading").html(), bgvisibel: true, width: 270, height: 120, title: '选课请求' });
+
+            //alert(teachIdChoose);
+
+            var url = "../vatuu/CourseStudentAction?setAction=addStudentCourseApply&teachId=" + teachIdChoose + "&isBook=" + isBook + "&tt=" + new Date().getTime();
+
+            createXMLHttpRequest();
+
+            xmlHttp.onreadystatechange = addApplyChooseStateChange;
+
+            xmlHttp.open("GET", url, true);
+
+            xmlHttp.send(null);
+
+        }
+
+        function addApplyChooseStateChange() {
+
+            if (xmlHttp.readyState == 4) {
+
+                if (xmlHttp.status == 200) {
+
+                    updateApplyChoose();
+
+                }
+
+            }
+
+        }
+
+        function updateApplyChoose() {
+
+            var selectState = xmlHttp.responseXML.getElementsByTagName("selectState")[0].firstChild.nodeValue;
+
+            var message = xmlHttp.responseXML.getElementsByTagName("message")[0].firstChild.nodeValue;
+
+            var text = "";
+
+            if (selectState == "1") {
+
+                text = "<p style=\"color:#ff0000;font-weight:bold;line-height:25px;\">&nbsp;选课申请成功！</p>&nbsp;<input type=\"button\" name=\"btn2_1\" value=\"继续选课\" onclick=\"selfCloseWebox()\" class=\"btn btn-blue\" style=\"width:120px;\">&nbsp;<input type=\"button\" name=\"btn2_2\" value=\"查看结果\" onclick=\"window.location='../vatuu/CourseStudentAction?setAction=studentCourseSysApply'\" class=\"btn btn-green\" style=\"width:120px;\">";
+
+                //alert("选课申请提交成功");
+
+            }
+
+            else {
+
+                text = "<p style=\"color:#ff0000;font-weight:bold;line-height:25px;\">&nbsp;" + message + "！</p>&nbsp;<input type=\"button\" name=\"btn2_1\" value=\"选其它课\" onclick=\"selfCloseWebox()\" class=\"btn btn-blue\" style=\"width:120px;\">";
+
+                //alert(message);
+
+            }
+
+            //alert(message);
+
+            selfCloseWebox();
+
+            document.getElementById("viewLoading").innerHTML = text;
+
+            $.webox({ html: $("#viewLoading").html(), bgvisibel: true, width: 270, height: 120, title: '选课请求' });
+
+        }
+
+
+
+
+
+        function viewChooseRule(ruleType, teachId) {
+
+            $.webox({ iframe: '../vatuu/CourseStudentAction?setAction=studentCourseSysChooseRule&ruleType=' + ruleType + '&teachId=' + teachId, bgvisibel: true, width: 660, height: 350, title: '查看课程选课限制' });
+
+            //$('.webox').css({left:auto,top:auto,overflow:scroll});
+
+        }
+
+
+
+
+
+        function selfCloseWebox() {
+
+            $("body").find(".background").remove();
+
+            $("body").find(".webox").remove();
+
+        }
+
+
+
+        //刷新学分
+
+        function modifyStudentCreditHour() {
+
+            var url = "../vatuu/CourseStudentAction?setAction=modifyStudentCourseCredit&tt=" + new Date().getTime();
+
+            createXMLHttpRequest();
+
+            xmlHttp.onreadystatechange = modifyStudentCreditHourState;
+
+            xmlHttp.open("GET", url, true);
+
+            xmlHttp.send(null);
+
+        }
+
+        function modifyStudentCreditHourState() {
+
+            if (xmlHttp.readyState == 4) {
+
+                if (xmlHttp.status == 200) {
+
+                    modifyStudentCreditHourSet();
+
+                }
+
+            }
+
+        }
+
+        function modifyStudentCreditHourSet() {
+
+            var selectState = xmlHttp.responseXML.getElementsByTagName("selectState")[0].firstChild.nodeValue;
+
+            if (selectState == "1") {
+
+                getStudentCreditHour();
+
+            }
+
+            else {
+
+                alert("更新失败");
+
+            }
+
+        }
+
+    </script>
+</body>
+
+</html>

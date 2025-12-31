@@ -134,7 +134,7 @@ def check_session_expired(res_text: str) -> None:
         raise LoginExpiredError("登录过期")
 
 
-def parse_course_table(html_text: str) -> list[dict]:
+def parse_course_table(html_text: str) -> list[dict[str, str]]:
     """解析课程表格 HTML 并返回结果列表"""
     html = etree.HTML(html_text)
     rows = html.xpath('//*[@id="table3"]/tr')
@@ -156,15 +156,21 @@ def parse_course_table(html_text: str) -> list[dict]:
             date_nodes = item.xpath("td[11]//text()")
             date = ", ".join([t.strip() for t in date_nodes if t.strip()])
 
+            # 第二次选课开始，没有第十四行的「申请人数」，校区改为十四行
+            campus = (
+                item.xpath("string(td[15]/a/span)")
+                or item.xpath("string(td[14]/a/span)")
+            ).strip()
+
             dic = {
                 "teacher": teachers,
                 "date": date,
-                "course": item.xpath("td[4]/a/span/text()")[0].strip(),
-                "course_code": item.xpath("td[3]/a/span/text()")[0].strip(),
-                "selected": item.xpath("td[13]/text()")[0].strip(),
-                "chooseId": item.xpath("td[2]/span[2]/text()")[0].strip(),
-                "teachId": item.xpath("td[2]/span/text()")[0].strip(),
-                "campus": item.xpath("td[15]/a/span/text()")[0].strip(),
+                "campus": campus,
+                "course": item.xpath("string(td[4])").strip(),
+                "course_code": item.xpath("string(td[3])").strip(),
+                "selected": item.xpath("string(td[13])").strip(),
+                "chooseId": item.xpath("string(td[2]/span[2])").strip(),
+                "teachId": item.xpath("string(td[2]/span[1])").strip(),
             }
             ret.append(dic)
         except IndexError:

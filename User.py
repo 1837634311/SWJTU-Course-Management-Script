@@ -2,7 +2,6 @@ import re
 import sys
 import time
 import traceback
-from typing import Optional
 
 import utils
 from utils import BASE_URL, LoginExpiredError
@@ -93,15 +92,18 @@ class User:
         res = self._request("POST", query_url, data=data)
         courses: list[dict[str, str]] = utils.parse_course_table(res.text)
 
-        for course in courses:
-            print(f"课程名称：{course['course']}")
-            print(f"任课教师：{course['teacher']}")
-            print(f"选课状态：{course['selected']}")
-            print(f"选课编码：{course['chooseId']}")
-            print(f"上课校区：{course['campus']}")
-            print(f"上课时间：{course['date']}\n")
+        if courses:
+            for course in courses:
+                print(f"课程名称：{course['course']}")
+                print(f"任课教师：{course['teacher']}")
+                print(f"选课状态：{course['selected']}")
+                print(f"选课编码：{course['chooseId']}")
+                print(f"上课校区：{course['campus']}")
+                print(f"上课时间：{course['date']}\n")
+        else:
+            print("未找到课程信息，请检查课程代码是否正确")
 
-    def query_by_chooseId(self, chooseId: str) -> dict[str, str]:
+    def query_by_chooseId(self, chooseId: str) -> dict[str, str] | None:
         """根据选课编号查询课程信息"""
         query_url = f"{BASE_URL}/vatuu/CourseStudentAction"
         data = {
@@ -115,18 +117,25 @@ class User:
             "btn": "执行查询",
         }
         res = self._request("POST", query_url, data=data)
-        return utils.parse_course_table(res.text)[0]
+        course = utils.parse_course_table(res.text)
+        if course:
+            return course[0]
+        else:
+            return None
 
     def query_teachIds(self, chooseIds: list[str]) -> None:
         """查询多项课程的 teachId，方便替换"""
         print("teachIds = [")
 
         for chooseId in chooseIds:
-            course: dict = self.query_by_chooseId(chooseId)
-            teacher: str = course["teacher"]
-            course_name: str = course["course"]
-            teachId: str = course["teachId"]
-            print(f"    ('{teachId}', '{teacher}-{course_name}'),")
+            course = self.query_by_chooseId(chooseId)
+            if course:
+                teacher: str = course["teacher"]
+                course_name: str = course["course"]
+                teachId: str = course["teachId"]
+                print(f"    ('{teachId}', '{teacher}-{course_name}'),")
+            else:
+                print(f"    未找到 {chooseId} 信息，请检查选课编码是否正确")
 
         print("]")
 
@@ -139,13 +148,14 @@ class User:
         if matches:
             return matches[0]
         else:
+            # 从系统还未开放就选课，所以返回信息而非错误
             return "选课系统未开放"
 
-    def get_teachId(self, chooseId: str) -> Optional[str]:
+    def get_teachId(self, chooseId: str) -> str | None:
         """根据选课编号查询 teachId"""
         res = self.query_by_chooseId(chooseId)
         if res:
-            return res["teachId"]
+            return res.get("teachId")
         return None
 
     def del_course(self, listId, chooseId) -> str:
@@ -171,16 +181,15 @@ class User:
             else:
                 print(f"未在已选列表中找到课程 {chooseId}")
 
-    def run_select_course(self, chooseId: str) -> None:
+    def run_select_course(self, chooseId: str):
         """持续尝试选课任务"""
         teachId = self.get_teachId(chooseId)
-        if not teachId:
-            print(f"无法获取课程 {chooseId} 的 teachId，请检查课程编号或网络。")
-            return
+        if teachId:
+            self.run_select_course_with_teachId(teachId, course_name=chooseId)
+        else:
+            print("未找到 teachId，请检查课程编码是否正确")
 
-        self.run_select_course_with_teachId(teachId, course_name=chooseId)
-
-    def run_select_course_with_teachId(self, teachId: str, course_name: str) -> None:
+    def run_select_course_with_teachId(self, teachId: str, course_name: str):
         """已知 teachId 直接选课任务"""
 
         def check_success(msg):
