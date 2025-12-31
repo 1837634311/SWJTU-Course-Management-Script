@@ -40,7 +40,9 @@ class User:
         utils.check_session_expired(res.text)
         return res
 
-    def _monitor_loop(self, task_name: str, func, args=(), success_check=None):
+    def _monitor_loop(
+        self, task_name: str, func, args=(), check=None, send_email=False
+    ):
         """通用监控循环
 
         参数：
@@ -68,6 +70,8 @@ class User:
                 # 检查是否成功
                 if check(result):
                     print(f"课程 {task_name} 已完成。")
+                    if "成功" in result and send_email:
+                        self.send(f"选课完成: {task_name}", result)
                     break
 
             except LoginExpiredError:
@@ -186,21 +190,26 @@ class User:
             else:
                 print(f"未在已选列表中找到课程 {chooseId}")
 
-    def run_select_course(self, chooseId: str):
+    def run_select_course(self, chooseId: str, send_email=False):
         """持续尝试选课任务"""
         teachId = self.get_teachId(chooseId)
         if teachId:
-            self.run_select_course_with_teachId(teachId, course_name=chooseId)
+            self.run_select_course_with_teachId(
+                teachId, course_name=chooseId, send_email=send_email
+            )
         else:
             print("未找到 teachId，请检查课程编码是否正确")
 
-    def run_select_course_with_teachId(self, teachId: str, course_name: str):
+    def run_select_course_with_teachId(
+        self, teachId: str, course_name: str, send_email=False
+    ):
         """已知 teachId 直接选课任务"""
 
         self._monitor_loop(
             task_name=f"{course_name}",
             func=self.select_course,
             args=(teachId,),
+            send_email=send_email,
         )
 
 

@@ -61,17 +61,20 @@ def _(threading, user):
         ('C8807086D60F0EF0', '雷治红-岩体力学'),
     ]
 
+    send_mail = True
+
     threads = []
     for teachId, course in teachIds:
-        t = threading.Thread(
-            target=user.run_select_course_with_teachId, args=(teachId, course)
+        thread = threading.Thread(
+            target=user.run_select_course_with_teachId,
+            args=(teachId, course, send_mail),
         )
-        threads.append(t)
+        threads.append(thread)
     # 启动线程
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
     return
 
 
@@ -87,16 +90,20 @@ def _(mo):
 def _(threading, user):
     chooseIds = ["B0894"]
 
-    threads = []
+    send_email = True
+
+    threads2 = []
     for chooseId in chooseIds:
-        t = threading.Thread(target=user.run_select_course, args=(chooseId,))
-        threads.append(t)
+        thread2 = threading.Thread(
+            target=user.run_select_course, args=(chooseId, send_email)
+        )
+        threads2.append(thread2)
 
     # 启动线程
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    for thread2 in threads2:
+        thread2.start()
+    for thread2 in threads2:
+        thread2.join()
     return
 
 
