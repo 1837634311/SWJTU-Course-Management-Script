@@ -92,13 +92,16 @@ marimo edit main.py
 
 在打开的 Notebook 页面中，有如下几个 Cell，分别对应不同的功能：
 
--  **登录**：运行第一个 Cell 进行登录。
+-  **登录**：运行第二个 Cell 进行登录。
 -  **查询课程**：
     1. `query_by_course_code`：查询某课程代码下，所有课程的详细信息，包括教师、时间、余量、课程编码、校区等。
     2. `query_teachIds`：根据课程编码，批量查询课程的 `teachId`。
 -  **选课**：
     1. `run_select_course_with_teachId`：根据 `teachId`，批量选课。
     2. `run_select_course_with_course_code`：根据课程编码，批量选课。
+    3. `interval`：选课间隔，单位为秒。
+       建议只在高峰期设置较短间隔，如果是为了挂着等选修，可以设置长一点。
+    4. `send_mail`：若设置为 `True`，则可以在选课成功时发送邮件通知。
 -  **退课**：
     1. `del_courses`：根据课程编号，批量退课。
 
@@ -106,6 +109,9 @@ marimo edit main.py
 > 如果需要选课，建议先分析好第二次选课要选的课程，避免冲突。
 >
 > 建议第一次选课时，先测试脚本是否正常
+
+> [!WARNING]
+> 只有返回选课成功才退出线程，否则会持续循环选课。因此退出需要重启内核。
 
 ## 🙏 感谢
 
