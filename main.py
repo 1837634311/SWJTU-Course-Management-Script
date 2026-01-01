@@ -6,12 +6,12 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import threading
+    import marimo as mo
 
     from config import email_config, password, username
     from User import User
-    import marimo as mo
-    return User, email_config, mo, password, threading, username
+
+    return User, email_config, mo, password, username
 
 
 @app.cell
@@ -54,7 +54,7 @@ def _(mo):
 
 
 @app.cell
-def _(threading, user):
+def _(user):
     # 待选课程 teachId
     teachIds = [
         ('B376082258DAC2D9', '张健-地球物理勘探'),
@@ -66,18 +66,7 @@ def _(threading, user):
     # 选课间隔
     interval = 0.5
 
-    threads = []
-    for teachId, course in teachIds:
-        thread = threading.Thread(
-            target=user.run_select_course_with_teachId,
-            args=(teachId, course, interval, send_mail),
-        )
-        threads.append(thread)
-    # 启动线程
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
+    user.run_select_courses_with_teachIds(teachIds, interval, send_mail)
     return
 
 
@@ -90,7 +79,7 @@ def _(mo):
 
 
 @app.cell
-def _(threading, user):
+def _(user):
     chooseIds = ["B0894"]
 
     # 选课成功后，是否发送邮件通知
@@ -98,19 +87,7 @@ def _(threading, user):
     # 选课间隔
     interval = 0.5
 
-    threads2 = []
-    for chooseId in chooseIds:
-        thread2 = threading.Thread(
-            target=user.run_select_course,
-            args=(chooseId, interval, send_email),
-        )
-        threads2.append(thread2)
-
-    # 启动线程
-    for thread2 in threads2:
-        thread2.start()
-    for thread2 in threads2:
-        thread2.join()
+    user.run_select_courses(chooseIds, interval, send_email)
     return
 
 
@@ -226,11 +203,6 @@ def _(User):
 @app.cell
 def _(choose_id, user, user2, 抢课):
     抢课(user, user2, choose_id)
-    return
-
-
-@app.cell
-def _():
     return
 
 

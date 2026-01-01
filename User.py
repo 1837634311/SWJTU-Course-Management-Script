@@ -1,5 +1,6 @@
 import re
 import sys
+import threading
 import time
 import traceback
 
@@ -190,26 +191,43 @@ class User:
             else:
                 print(f"未在已选列表中找到课程 {chooseId}")
 
-    def run_select_course(self, chooseId: str, interval=0.5, send_email=False):
-        """持续尝试选课任务"""
-        teachId = self.get_teachId(chooseId)
-        if teachId:
-            self.run_select_course_with_teachId(teachId, chooseId, interval, send_email)
-        else:
-            print("未找到 teachId，请检查课程编码是否正确")
-
-    def run_select_course_with_teachId(
-        self, teachId: str, course_name: str, interval=0.5, send_email=False
+    def run_select_courses_with_teachIds(
+        self, teachIds: list[tuple[str, str]], interval=0.5, send_email=False
     ):
-        """已知 teachId 直接选课任务"""
+        """已知 teachId 直接选课任务（多线程）"""
+        threads = []
+        for tid, name in teachIds:
+            thread = threading.Thread(
+                target=self._monitor_loop,
+                kwargs={
+                    "task_name": name,
+                    "interval": interval,
+                    "func": self.select_course,
+                    "args": (tid,),
+                    "send_email": send_email,
+                },
+            )
+            threads.append(thread)
 
-        self._monitor_loop(
-            task_name=f"{course_name}",
-            interval=interval,
-            func=self.select_course,
-            args=(teachId,),
-            send_email=send_email,
-        )
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+    def run_select_courses(self, chooseIds: list[str], interval=0.5, send_email=False):
+        """根据选课编号持续尝试选课任务（多线程）"""
+        tasks = []
+        for cid in chooseIds:
+            tid = self.get_teachId(cid)
+            if tid:
+                tasks.append((tid, cid))
+            else:
+                print(f"[{utils.get_time()}] : 编号 {cid} 无效，自动跳过")
+
+        if tasks:
+            self.run_select_courses_with_teachIds(tasks, interval, send_email)
+        else:
+            print(f"[{utils.get_time()}] : 无可执行任务")
 
 
 if __name__ == "__main__":
