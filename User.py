@@ -1,11 +1,10 @@
 import re
 import sys
-import threading
 import time
 import traceback
 
 import utils
-from utils import BASE_URL, LoginExpiredError
+from utils import BASE_URL
 
 
 class User:
@@ -35,83 +34,11 @@ class User:
     def send(self, subject, text="") -> None:
         utils.send(self.email_config, subject, text)
 
-    def _request(self, method: str, url: str, **kwargs):
+    def request(self, method: str, url: str, **kwargs):
         """统一请求，包含登录状态检查"""
         res = self.ss.request(method=method, url=url, **kwargs)
         utils.check_session_expired(res.text)
         return res
-
-    def _monitor_loop(
-        self, task_name: str, func, interval, args=(), check=None, send_email=False
-    ):
-        """通用监控循环
-
-        参数：
-            task_name: 任务名称
-            func: 每次循环执行的函数
-            args: 函数参数
-            check: 判断是否完成的回调函数，接收 func 的返回值
-        """
-
-        def check_completed(msg):
-            status: list[str] = ["选课成功", "选课申请成功", "冲突"]
-            return any(s in msg for s in status)
-
-        if check is None:
-            check = check_completed
-
-        print(f"开始选课: {task_name}")
-
-        while True:
-            try:
-                # 执行核心逻辑
-                result = func(*args)
-                print(f"[{utils.get_time()}] {task_name} : {result}")
-
-                # 检查是否成功
-                if check(result):
-                    print(f"课程 {task_name} 已完成。")
-                    if "成功" in result and send_email:
-                        self.send(f"选课完成: {task_name}", result)
-                    break
-
-            except LoginExpiredError:
-                print("登录过期，尝试重新登录...")
-                try:
-                    self.ss = self.login(self.username, self.password)
-                except Exception as e:
-                    print(f"重连失败: {e}")
-            except Exception as e:
-                print(f"[{utils.get_time()}] {task_name} 发生异常: {e}")
-
-            time.sleep(interval)
-
-    def query_by_course_code(self, code: str) -> None:
-        """按课程代码查询可选课程，返回可选课程的相关信息"""
-        query_url = f"{BASE_URL}/vatuu/CourseStudentAction"
-        data = {
-            "setAction": "studentCourseSysSchedule",
-            "viewType": "",
-            "jumpPage": 1,
-            "selectAction": "CourseCode",
-            "key1": code,
-            "courseType": "all",
-            "key4": "",
-            "btn": "执行查询",
-        }
-        res = self._request("POST", query_url, data=data)
-        courses: list[dict[str, str]] = utils.parse_course_table(res.text)
-
-        if courses:
-            for course in courses:
-                print(f"课程名称：{course['course']}")
-                print(f"任课教师：{course['teacher']}")
-                print(f"选课状态：{course['selected']}")
-                print(f"选课编码：{course['chooseId']}")
-                print(f"上课校区：{course['campus']}")
-                print(f"上课时间：{course['date']}\n")
-        else:
-            print("未找到课程信息，请检查课程代码是否正确")
 
     def query_by_chooseId(self, chooseId: str) -> dict[str, str] | None:
         """根据选课编号查询课程信息"""
@@ -126,33 +53,17 @@ class User:
             "key4": "",
             "btn": "执行查询",
         }
-        res = self._request("POST", query_url, data=data)
+        res = self.request("POST", query_url, data=data)
         course = utils.parse_course_table(res.text)
         if course:
             return course[0]
         else:
             return None
 
-    def query_teachIds(self, chooseIds: list[str]) -> None:
-        """查询多项课程的 teachId，方便替换"""
-        print("teachIds = [")
-
-        for chooseId in chooseIds:
-            course = self.query_by_chooseId(chooseId)
-            if course:
-                teacher: str = course["teacher"]
-                course_name: str = course["course"]
-                teachId: str = course["teachId"]
-                print(f"    ('{teachId}', '{teacher}-{course_name}'),")
-            else:
-                print(f"    未找到 {chooseId} 信息，请检查选课编码是否正确")
-
-        print("]")
-
     def select_course(self, teachId) -> str:
         """根据 teachId 选课"""
         url = f"{BASE_URL}/vatuu/CourseStudentAction?setAction=addStudentCourseApply&teachId={teachId}&isBook=1&tt={utils.get_timestamp()}"
-        res = self._request("GET", url)
+        res = self.request("GET", url)
 
         matches = re.findall("<message>(.*?)</message>", res.text)
         if matches:
@@ -170,64 +81,11 @@ class User:
 
     def del_course(self, listId, chooseId) -> str:
         """删除课程"""
-        # 删除课程似乎不需要检查 session expired? 原代码里没有检查，保持原样，但在 _request 里会有检查
-        # 稳妥起见，统一走 _request
+        # 删除课程似乎不需要检查 session expired? 原代码里没有检查，保持原样，但在 request 里会有检查
+        # 稳妥起见，统一走 request
         url = f"{BASE_URL}/vatuu/CourseStudentAction?setAction=delStudentCourseList&listId={listId}&teachId={chooseId}&tt={utils.get_timestamp()}"
-        res = self._request("GET", url)
+        res = self.request("GET", url)
         return res.text
-
-    def del_courses(self, chooseIds: list[str]) -> None:
-        """批量删除课程，只查询一次列表"""
-        url = f"{BASE_URL}/vatuu/CourseStudentAction?setAction=studentCourseSysList&viewType=delCourse"
-        res = self._request("GET", url)
-
-        mapping = utils.parse_delete_list(res.text)
-
-        for chooseId in chooseIds:
-            target_listId = mapping.get(chooseId)
-            if target_listId:
-                self.del_course(chooseId=chooseId, listId=target_listId)
-                print(f"尝试删除课程 {chooseId} done.")
-            else:
-                print(f"未在已选列表中找到课程 {chooseId}")
-
-    def run_select_courses_with_teachIds(
-        self, teachIds: list[tuple[str, str]], interval=0.5, send_email=False
-    ):
-        """已知 teachId 直接选课任务（多线程）"""
-        threads = []
-        for tid, name in teachIds:
-            thread = threading.Thread(
-                target=self._monitor_loop,
-                kwargs={
-                    "task_name": name,
-                    "interval": interval,
-                    "func": self.select_course,
-                    "args": (tid,),
-                    "send_email": send_email,
-                },
-            )
-            threads.append(thread)
-
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-
-    def run_select_courses(self, chooseIds: list[str], interval=0.5, send_email=False):
-        """根据选课编号持续尝试选课任务（多线程）"""
-        tasks = []
-        for cid in chooseIds:
-            tid = self.get_teachId(cid)
-            if tid:
-                tasks.append((tid, cid))
-            else:
-                print(f"[{utils.get_time()}] : 编号 {cid} 无效，自动跳过")
-
-        if tasks:
-            self.run_select_courses_with_teachIds(tasks, interval, send_email)
-        else:
-            print(f"[{utils.get_time()}] : 无可执行任务")
 
 
 if __name__ == "__main__":

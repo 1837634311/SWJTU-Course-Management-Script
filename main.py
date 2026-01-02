@@ -8,10 +8,11 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
 
+    import Strategy as tasks
     from config import email_config, password, username
     from User import User
 
-    return User, email_config, mo, password, username
+    return User, email_config, mo, password, tasks, username
 
 
 @app.cell
@@ -54,7 +55,7 @@ def _(mo):
 
 
 @app.cell
-def _(user):
+def _(tasks, user):
     # 待选课程 teachId
     teachIds = [
         ('B376082258DAC2D9', '张健-地球物理勘探'),
@@ -66,7 +67,7 @@ def _(user):
     # 选课间隔
     interval = 0.5
 
-    user.run_select_courses_with_teachIds(teachIds, interval, send_mail)
+    tasks.run_select_courses_with_teachIds(user, teachIds, interval, send_mail)
     return
 
 
@@ -79,7 +80,7 @@ def _(mo):
 
 
 @app.cell
-def _(user):
+def _(tasks, user):
     chooseIds = ["B0894"]
 
     # 选课成功后，是否发送邮件通知
@@ -87,7 +88,7 @@ def _(user):
     # 选课间隔
     interval = 0.5
 
-    user.run_select_courses(chooseIds, interval, send_email)
+    tasks.run_select_courses(user, chooseIds, interval, send_email)
     return
 
 
@@ -111,9 +112,9 @@ def _(mo):
 
 
 @app.cell
-def _(user):
+def _(tasks, user):
     chooseId_list = ["B0870", "B0878"]
-    user.query_teachIds(chooseId_list)
+    tasks.query_teachIds(user, chooseId_list)
     return
 
 
@@ -139,9 +140,9 @@ def _(mo):
 
 
 @app.cell
-def _(user):
+def _(tasks, user):
     course_code = "SoAD038615"
-    user.query_by_course_code(course_code)
+    tasks.query_by_course_code(user, course_code)
     return
 
 
@@ -156,9 +157,9 @@ def _(mo):
 
 
 @app.cell
-def _(user):
+def _(tasks, user):
     delete_courses = ["B0866"]
-    user.del_courses(delete_courses)
+    tasks.del_courses(user, delete_courses)
     return
 
 
