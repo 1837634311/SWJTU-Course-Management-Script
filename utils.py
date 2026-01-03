@@ -73,7 +73,7 @@ def login(username: str, password: str) -> requests.Session:
         raise ValueError(f"登录响应解析失败: {res.text}")
 
     if res_json.get("loginStatus") == "1":
-        print(f"【{get_time()}】登录成功！")
+        print_log("登录成功！")
     elif res_json.get("loginStatus") == "-2":
         raise ValueError(
             "登录失败：验证码识别错误\n" + f"具体原因：\n{res_json.get('loginMsg')}",
@@ -119,9 +119,12 @@ def send(config, subject, text):
         print(f"邮件发送失败: {e}")
 
 
-def get_time() -> str:
-    """返回时间：`2025-12-31 14:09:42:444`"""
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
+def print_log(msg: str, quiet: bool = False) -> None:
+    """打印日志"""
+    # 样式：2025-12-31 14:09:42:444
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
+    if not quiet:
+        print(f"[{time}] {msg}")
 
 
 def get_timestamp() -> int:

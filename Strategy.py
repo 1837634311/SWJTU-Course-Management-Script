@@ -7,7 +7,14 @@ from utils import BASE_URL, LoginExpiredError
 
 
 def monitor_loop(
-    user: User, task_name: str, func, interval, args=(), check=None, send_email=False
+    user: User,
+    task_name: str,
+    func,
+    interval,
+    args=(),
+    check=None,
+    send_email=False,
+    quiet=False,
 ):
     """通用监控循环
 
@@ -19,6 +26,7 @@ def monitor_loop(
         args: 函数参数
         check: 判断是否完成的回调函数，接收 func 的返回值
         send_email: 是否发送邮件
+        quiet: 静默模式，不显示日志
     """
 
     def check_completed(msg: str) -> bool:
@@ -34,23 +42,23 @@ def monitor_loop(
         try:
             # 执行核心逻辑
             result: str = func(*args)
-            print(f"[{utils.get_time()}] {task_name} : {result}")
+            utils.print_log(f"{task_name} : {result}", quiet)
 
             # 检查是否成功
             if check(result):
-                print(f"课程 {task_name} 已完成。")
+                utils.print_log(f"{task_name} 已完成。", quiet)
                 if "成功" in result and send_email:
                     user.send(f"选课完成: {task_name}", result)
                 break
 
         except LoginExpiredError:
-            print("登录过期，尝试重新登录...")
+            utils.print_log("登录过期，尝试重新登录...", quiet)
             try:
                 user.ss = user.login(user.username, user.password)
             except Exception as e:
-                print(f"重连失败: {e}")
+                utils.print_log(f"重连失败: {e}", quiet)
         except Exception as e:
-            print(f"[{utils.get_time()}] {task_name} 发生异常: {e}")
+            utils.print_log(f"{task_name} 发生异常: {e}", quiet)
 
         time.sleep(interval)
 
@@ -100,12 +108,13 @@ def query_teachIds(user: User, chooseIds: list[str]) -> None:
     print("]")
 
 
-def del_courses(user: User, chooseIds: list[str]) -> None:
+def del_courses(user: User, chooseIds: list[str], quiet: bool = False) -> None:
     """批量删除课程，只查询一次列表
 
     参数：
         user: 用户实例
         chooseIds: 选课编号列表
+        quiet: 静默模式，不显示日志
     """
     mapping = user.query_selected_courses()
 
@@ -113,9 +122,11 @@ def del_courses(user: User, chooseIds: list[str]) -> None:
         target_listId = mapping.get(chooseId)
         if target_listId:
             user.del_course(chooseId=chooseId, listId=target_listId)
-            print(f"尝试删除课程 {chooseId} done.")
+            msg = f"尝试删除课程 {chooseId}"
         else:
-            print(f"未在已选列表中找到课程 {chooseId}")
+            msg = f"未在已选列表中找到课程 {chooseId}"
+
+        utils.print_log(msg, quiet)
 
 
 def run_select_courses_with_teachIds(
@@ -153,9 +164,9 @@ def run_select_courses(
         if tid:
             tasks.append((tid, cid))
         else:
-            print(f"[{utils.get_time()}] : 编号 {cid} 无效，自动跳过")
+            utils.print_log(f"编号 {cid} 无效，自动跳过")
 
     if tasks:
         run_select_courses_with_teachIds(user, tasks, interval, send_email)
     else:
-        print(f"[{utils.get_time()}] : 无可执行任务")
+        utils.print_log("无可执行任务")

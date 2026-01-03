@@ -22,11 +22,11 @@ class User:
                 ss = utils.login(username, password)
                 return ss
             except ValueError as msg:
-                print(f"【{utils.get_time()}】:{msg}")
+                utils.print_log(f"{msg}")
                 # 很多时候是验证码错误，重试即可
                 time.sleep(2)
             except Exception:
-                print("*" * 8 + f"\n意外报错： {utils.get_time()}\n")
+                utils.print_log("意外报错：\n" + "*" * 8)
                 print(traceback.format_exc())
                 # 严重错误退出，避免死循环消耗资源
                 sys.exit(1)
