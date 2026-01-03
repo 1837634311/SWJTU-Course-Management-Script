@@ -179,8 +179,12 @@ def parse_course_table(html_text: str) -> list[dict[str, str]]:
     return ret
 
 
-def parse_delete_list(html_text: str) -> dict[str, str]:
-    """解析已选课程列表 HTML，提取 chooseId 到 listId 的映射"""
+def parse_selected_list(html_text: str) -> dict[str, str]:
+    """解析已选课程列表 HTML，提取 chooseId 到 listId 的映射
+
+    返回：
+        {chooseId: listId} 格式的字典。
+    """
     html = etree.HTML(html_text)
     elements = html.xpath('//*[@id="table3"]/tr')[1:-1]
 

@@ -101,11 +101,13 @@ def query_teachIds(user: User, chooseIds: list[str]) -> None:
 
 
 def del_courses(user: User, chooseIds: list[str]) -> None:
-    """批量删除课程，只查询一次列表"""
-    url = f"{BASE_URL}/vatuu/CourseStudentAction?setAction=studentCourseSysList&viewType=delCourse"
-    res = user.request("GET", url)
+    """批量删除课程，只查询一次列表
 
-    mapping = utils.parse_delete_list(res.text)
+    参数：
+        user: 用户实例
+        chooseIds: 选课编号列表
+    """
+    mapping = user.query_selected_courses()
 
     for chooseId in chooseIds:
         target_listId = mapping.get(chooseId)

@@ -60,6 +60,18 @@ class User:
         else:
             return None
 
+    def query_selected_courses(self) -> dict[str, str]:
+        """查询已选课程
+
+        返回：
+            {chooseId: listId} 格式的字典。
+        """
+        url = f"{BASE_URL}/vatuu/CourseStudentAction?setAction=studentCourseSysList&viewType=delCourse"
+        res = self.request("GET", url)
+
+        mapping = utils.parse_selected_list(res.text)
+        return mapping
+
     def select_course(self, teachId) -> str:
         """根据 teachId 选课"""
         url = f"{BASE_URL}/vatuu/CourseStudentAction?setAction=addStudentCourseApply&teachId={teachId}&isBook=1&tt={utils.get_timestamp()}"
